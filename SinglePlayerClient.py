@@ -7,10 +7,12 @@ from paho import mqtt
 import time
 
 gameBegun = False
-gameState = []
-widerGameState = []
+gameState = None
+widerGameState = None
+turnTime = False
 
-player_
+player_name = "P1"
+lobby_name = "Lobby1"
 
 # setting callbacks for different events to see if it works, print the message etc.
 def on_connect(client, userdata, flags, rc, properties=None):
@@ -69,6 +71,16 @@ def on_message(client, userdata, msg):
         elif(msg.payload == "STOP"):
             gameBegun = False
             print("Game has ended")
+    elif(topic_list[-1] == "game_state"):
+        gameState = msg.payload
+        widerGameState = None
+        print("board\n",msg.payload)
+        turnTime = True
+    elif(topic_list[-1] == "game_state"):
+        gameState = msg.payload
+        widerGameState = None
+        print("board\n",msg.payload)
+        turnTime = True
 
 
 if __name__ == '__main__':
@@ -93,7 +105,7 @@ if __name__ == '__main__':
     client.on_message = on_message
     client.on_publish = on_publish # Can comment out to not print when publishing to topics
 
-    player_1 = "P1"#input("Enter Name")
+    player_name = "P1"#input("Enter Name")
     lobby_name = "Lobby1"
 
     client.subscribe(f"games/{lobby_name}/lobby")
@@ -102,7 +114,7 @@ if __name__ == '__main__':
     client.subscribe(f'games/{lobby_name}/start')
     client.subscribe(f'games/{lobby_name}/stop')
 
-    client.publish("player_ready", json.dumps({'player_name' : player_1}))
+    client.publish("player_ready", json.dumps({'player_name' : player_name}))
 
     time.sleep(1) # Wait a second to resolve game start
     # client.publish(f"games/{lobby_name}/start", "START")
@@ -113,7 +125,12 @@ if __name__ == '__main__':
     
     client.loop_start()
     while(not gameBegun): time.sleep(1)
+    while(gameBegun):
+        while(not turnTime): time.sleep(0.1)
         
+        
+        
+        turnTime = False
     
 
 

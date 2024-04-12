@@ -102,8 +102,8 @@ if __name__ == '__main__':
 
     time.sleep(1) # Wait a second to resolve game start
     client.publish(f"games/{lobby_name}/start", "START")
-    # games/{lobby_name}/{player_name}/game_state” - subscribe to it to see when the game has started and receive the following data as json (all MQTT messages comes in as a byte array) that you can retrieve using json.loads(): 
-
+    # games/{lobby_name}/{player_name}/game_state - subscribe to it to see when the game has started and receive the following data as json (all MQTT messages comes in as a byte array) that you can retrieve using json.loads(): 
+    
     # client.publish(f"games/{lobby_name}/{player_1}/move", "UP")
     # client.publish(f"games/{lobby_name}/{player_2}/move", "DOWN")
     #  client.publish(f"games/{lobby_name}/{player_3}/move", "DOWN")
