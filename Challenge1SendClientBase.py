@@ -23,6 +23,8 @@ from paho import mqtt
 import os
 from dotenv import load_dotenv
 
+import random
+
 load_dotenv("credentials.env")
 username = os.getenv("USER_NAME")
 password = os.getenv("PASSWORD")
@@ -110,19 +112,4 @@ client.on_publish = on_publish
 
 
 # subscribe to all topics of encyclopedia by using the wildcard "#"
-client.subscribe("#", qos=1)
-
-
-# client.loop_start()
-
-# while(1):
-#     # a single publish, this can also be done in loops, etc.
-#     client.publish("encyclopedia/temperature", payload="hot", qos=1)
-#     time.sleep(3)
-# client.loop_end()
-
-# client.publish("encyclopedia/temperature", payload="hot", qos=1)
-
-# loop_forever for simplicity, here you need to stop the loop manually
-# you can also use loop_start and loop_stop
-client.loop_forever()
+# client.subscribe("#", qos=1)

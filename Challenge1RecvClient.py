@@ -14,6 +14,10 @@
 # limitations under the License.
 #
 
+import datetime as dt
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+import random
 import time
 
 
@@ -28,6 +32,30 @@ username = os.getenv("USER_NAME")
 password = os.getenv("PASSWORD")
 url = os.getenv("BROKER_ADDRESS")
 
+# Create figure for plotting
+fig = plt.figure()
+ax = fig.add_subplot(1, 1, 1)
+x1 = []
+x2 = []
+client1 = []
+client2 = []
+cnt1 = 0
+cnt2 = 0
+
+# This function is called periodically from FuncAnimation
+def animate(i):
+    global x1, x2, client1, client2
+
+    # Draw x and y lists
+    ax.clear()
+    ax.plot(x1, client1, label = "Client 1")
+    ax.plot(x2, client2, label = "Client 2")
+
+    # Format plot
+    plt.xticks(rotation=45, ha='right')
+    plt.subplots_adjust(bottom=0.30)
+    plt.title('Challenge 1')
+    plt.ylabel('RANDOM MQTT BS DATA')
 
 
 # setting callbacks for different events to see if it works, print the message etc.
@@ -84,6 +112,28 @@ def on_message(client, userdata, msg):
         :param msg: the message with topic and payload
     """
     print(msg.topic + " " + str(msg.qos) + " " + str(msg.payload))
+    global x1, x2, client1, client2, cnt1, cnt2
+    
+    if(msg.topic == "challenge1/client1"):
+
+        # Add x and y to lists
+        x1 = range(cnt1 + 1) 
+        cnt1 += 1
+        client1.append(int(msg.payload))
+
+        # Limit x and y lists to 20 items
+        x1 = x1[-20:]
+        client1 = client1[-20:]
+    elif(msg.topic == "challenge1/client2"):
+
+        # Add x and y to lists
+        x2 = range(cnt2 + 1) 
+        cnt2 += 1
+        client2.append(int(msg.payload))
+
+        # Limit x and y lists to 20 items
+        x2 = x2[-20:]
+        client2 = client2[-20:]
 
 
 
@@ -113,16 +163,7 @@ client.on_publish = on_publish
 client.subscribe("#", qos=1)
 
 
-# client.loop_start()
-
-# while(1):
-#     # a single publish, this can also be done in loops, etc.
-#     client.publish("encyclopedia/temperature", payload="hot", qos=1)
-#     time.sleep(3)
-# client.loop_end()
-
-# client.publish("encyclopedia/temperature", payload="hot", qos=1)
-
-# loop_forever for simplicity, here you need to stop the loop manually
-# you can also use loop_start and loop_stop
-client.loop_forever()
+client.loop_start()
+# Set up plot to call animate() function periodically
+ani = animation.FuncAnimation(fig, animate, fargs=(), interval=1000)
+plt.show()
