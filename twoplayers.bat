@@ -1,3 +1,4 @@
+start cmd /k gameclient.bat
 start cmd /k lobby.bat
 timeout /t 1 /nobreak
 start cmd /k singleplayer.bat P1 A
