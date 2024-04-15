@@ -213,15 +213,24 @@ if __name__ == '__main__':
                         if dist>temp:
                             dist = temp
                             closest_coin = coin
-                    if gameState['currentPosition'][0] < closest_coin[0]:
-                        client.publish(f"games/{lobby_name}/{player_name}/move", "RIGHT")
-                    elif gameState['currentPosition'][0] > closest_coin[0]:
-                        client.publish(f"games/{lobby_name}/{player_name}/move", "LEFT")
-                    elif gameState['currentPosition'][1] < closest_coin[1]:
-                        client.publish(f"games/{lobby_name}/{player_name}/move", "UP")
-                    elif gameState['currentPosition'][1] > closest_coin[1]:
-                        client.publish(f"games/{lobby_name}/{player_name}/move", "DOWB")
-                    exit()  
+                    try: 
+                        if gameState['currentPosition'][0] < closest_coin[0]:
+                            print("MOVING RIGHT")
+                            client.publish(f"games/{lobby_name}/{player_name}/move", "RIGHT")
+                        elif gameState['currentPosition'][0] > closest_coin[0]:
+                            print("MOVING LEFT")
+                            client.publish(f"games/{lobby_name}/{player_name}/move", "LEFT")
+                        elif gameState['currentPosition'][1] < closest_coin[1]:
+                            print("MOVING UP")
+                            client.publish(f"games/{lobby_name}/{player_name}/move", "UP")
+                        elif gameState['currentPosition'][1] > closest_coin[1]:
+                            print("MOVING DOWN")
+                            client.publish(f"games/{lobby_name}/{player_name}/move", "DOWN")
+                    except:
+                        moves = ["RIGHT", "LEFT", "UP", "DOWN"]
+                        chosen_move = moves[random.randint(0, 3)]
+                        print("MOVING " + chosen_move)
+                        client.publish(f"games/{lobby_name}/{player_name}/move", chosen_move)
                     move = ""
                     while(1):
                         move = input("Where do you want to move?")
