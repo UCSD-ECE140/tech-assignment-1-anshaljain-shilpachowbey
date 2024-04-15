@@ -245,8 +245,17 @@ if __name__ == '__main__':
                     except:
                         moves = ["RIGHT", "LEFT", "UP", "DOWN"]
                         chosen_move = moves[random.randint(0, 3)]
-                        print("MOVING " + chosen_move)
-                        client.publish(f"games/{lobby_name}/{player_name}/move", chosen_move)
+                        if chosen_move == 'RIGHT':
+                            new_pos = [gameState['currentPosition'][0]+1][gameState['currentPosition'][1]]
+                        if chosen_move == 'LEFT':
+                            new_pos = [gameState['currentPosition'][0]-1][gameState['currentPosition'][1]]
+                        if chosen_move == 'UP':
+                            new_pos = [gameState['currentPosition'][0]][gameState['currentPosition'][1]+1]
+                        if chosen_move == 'DOWN':
+                            new_pos = [gameState['currentPosition'][0]][gameState['currentPosition'][1]-1]
+                        if new_pos not in gameState[walls] & new_pos not in gameState["enemyPositions"] & new_pos not in gameState["teammatePositions"]:
+                            print("MOVING " + chosen_move)
+                            client.publish(f"games/{lobby_name}/{player_name}/move", chosen_move)
                     #move = ""
                     #while(1):
                     #    move = input("Where do you want to move?")
