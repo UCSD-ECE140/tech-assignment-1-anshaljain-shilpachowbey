@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 import paho.mqtt.client as paho
 from paho import mqtt
-import time
+import time, random
 
 gameBegun = False
 gameState = None
@@ -88,7 +88,7 @@ def on_message(client, userdata, msg):
             , "coin2": gameState['coin2'] + msg.payload['coin2'] \
             , "coin3": gameState['coin3'] + msg.payload['coin3'] \
             , "walls": gameState['walls'] + msg.payload['walls']}
-        print("board\n",msg.payload)
+        print("wider_game_state\n", widerGameState)
         turnTime = True
 
 
@@ -100,7 +100,7 @@ if __name__ == '__main__':
     username = os.environ.get('USER_NAME')
     password = os.environ.get('PASSWORD')
 
-    client = paho.Client(callback_api_version=paho.CallbackAPIVersion.VERSION1, client_id="Player1", userdata=None, protocol=paho.MQTTv5)
+    client = paho.Client(callback_api_version=paho.CallbackAPIVersion.VERSION1, client_id="Player" + str(random.randint(0,65565)), userdata=None, protocol=paho.MQTTv5)
     
     # enable TLS for secure connection
     client.tls_set(tls_version=mqtt.client.ssl.PROTOCOL_TLS)
@@ -114,8 +114,8 @@ if __name__ == '__main__':
     client.on_message = on_message
     client.on_publish = on_publish # Can comment out to not print when publishing to topics
 
-    player_name = "P1"#input("Enter Name")
-    team_name = "ATEAM"
+    player_name = input("Enter Name")
+    team_name = input("Enter Team")
 
     client.subscribe(f"games/{lobby_name}/lobby")
     client.subscribe(f'games/{lobby_name}/+/game_state')
@@ -135,7 +135,7 @@ if __name__ == '__main__':
     
     client.loop_start()
     # while(not gameBegun): time.sleep(1)
-    while(gameBegun):
+    while(1 or gameBegun):
         print(f"Lobby:{lobby_name}\n")
         # while(not turnTime): time.sleep(0.1)
         client.publish(f"teams/{team_name}/{player_name}", json.dumps(gameState))
