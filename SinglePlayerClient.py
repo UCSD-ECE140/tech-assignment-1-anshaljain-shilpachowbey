@@ -197,7 +197,7 @@ if __name__ == '__main__':
                     printGamestate(widerGameState)
 
                     walls = gameState['walls']
-                    closest_coin = None
+                    closest_coin = []
                     dist = 10
                     for coin in gameState['coin1']:
                         temp = abs((gameState['currentPosition'][1]-coin[1])+ (gameState['currentPosition'][0]-coin[0]))
@@ -216,7 +216,7 @@ if __name__ == '__main__':
                             closest_coin = coin
                     print("closest coin is " + str(closest_coin))
         
-                    if(closest_coin != None): 
+                    try: 
                         not_moved = True
                         if (gameState['currentPosition'][0] < closest_coin[0] and not_moved):
                             new_pos = [gameState['currentPosition'][0]+1,gameState['currentPosition'][1]]
@@ -236,27 +236,27 @@ if __name__ == '__main__':
                                 print("MOVING UP")
                                 client.publish(f"games/{lobby_name}/{player_name}/move", "UP")
                                 not_moved = False
-                        if (gameState['currentPosition'][1] > closest_coin[1] and not_moved):
+                        if gameState['currentPosition'][1] > closest_coin[1] & not_moved:
                             new_pos = [gameState['currentPosition'][0],gameState['currentPosition'][1]-1]
-                            if ((new_pos not in gameState["walls"]) and (new_pos not in gameState["enemyPositions"]) and (new_pos not in gameState["teammatePositions"])):
+                            if new_pos not in gameState["walls"] & new_pos not in gameState["enemyPositions"] & new_pos not in gameState["teammatePositions"]:
                                 print("MOVING DOWN")
                                 client.publish(f"games/{lobby_name}/{player_name}/move", "DOWN")
                                 not_moved = False
-                    else:
-                        moves = ["RIGHT", "LEFT", "UP", "DOWN"]
-                        chosen_move = moves[random.randint(0, 3)]
-
-                        if chosen_move == 'RIGHT':
-                            new_pos = [gameState['currentPosition'][0]+1][gameState['currentPosition'][1]]
-                        if chosen_move == 'LEFT':
-                            new_pos = [gameState['currentPosition'][0]-1][gameState['currentPosition'][1]]
-                        if chosen_move == 'UP':
-                            new_pos = [gameState['currentPosition'][0]][gameState['currentPosition'][1]+1]
-                        if chosen_move == 'DOWN':
-                            new_pos = [gameState['currentPosition'][0]][gameState['currentPosition'][1]-1]
-                        if new_pos not in gameState[walls] & new_pos not in gameState["enemyPositions"] & new_pos not in gameState["teammatePositions"]:
-                            print("RANDOM " + chosen_move)
-                            client.publish(f"games/{lobby_name}/{player_name}/move", chosen_move)
+                    except:
+                        while(1):
+                            chosen_move = allowed_moves[random.randint(0, 3)]
+                            if chosen_move == 'RIGHT':
+                                new_pos = [gameState['currentPosition'][0]+1,gameState['currentPosition'][1]]
+                            elif chosen_move == 'LEFT':
+                                new_pos = [gameState['currentPosition'][0]-1,gameState['currentPosition'][1]]
+                            elif chosen_move == 'UP':
+                                new_pos = [gameState['currentPosition'][0],gameState['currentPosition'][1]+1]
+                            elif chosen_move == 'DOWN':
+                                new_pos = [gameState['currentPosition'][0],gameState['currentPosition'][1]-1]
+                            if (new_pos not in gameState["walls"]) and (new_pos not in gameState["enemyPositions"]) and (new_pos not in gameState["teammatePositions"]):
+                                print("RANDOM " + chosen_move)
+                                client.publish(f"games/{lobby_name}/{player_name}/move", chosen_move)
+                                break
                     #move = ""
                     #while(1):
                     #    move = input("Where do you want to move?")
@@ -264,4 +264,3 @@ if __name__ == '__main__':
                     #        break
                     #client.publish(f"games/{lobby_name}/{player_name}/move", move)
                     # exit()  
-                    turnTime = False
