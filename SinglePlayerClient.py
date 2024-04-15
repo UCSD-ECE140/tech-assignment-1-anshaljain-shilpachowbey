@@ -15,6 +15,7 @@ player_name = "P1"
 lobby_name = "lobby"
 team_name = "ATEAM"
 
+allowed_moves = ["UP", "DOWN", "LEFT", "RIGHT"]
 
 def printGamestate(game_state):
     print("___________")
@@ -194,5 +195,11 @@ if __name__ == '__main__':
                     client.publish(f"teams/{team_name}/{player_name}", json.dumps(gameState))
                     while(widerGameState == None): time.sleep(1)
                     printGamestate(widerGameState)
-                    exit()  
+                    move = ""
+                    while(1):
+                        move = input("Where do you want to move?")
+                        if(move in allowed_moves):
+                            break
+                    client.publish(f"games/{lobby_name}/{player_name}/move", move)
+                    # exit()  
                     turnTime = False
