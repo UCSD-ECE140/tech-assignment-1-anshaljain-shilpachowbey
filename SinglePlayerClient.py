@@ -12,7 +12,8 @@ widerGameState = None
 turnTime = False
 
 player_name = "P1"
-lobby_name = "Lobby1"
+lobby_name = ""
+team_name = "ATEAM"
 
 # setting callbacks for different events to see if it works, print the message etc.
 def on_connect(client, userdata, flags, rc, properties=None):
@@ -54,6 +55,7 @@ def on_subscribe(client, userdata, mid, granted_qos, properties=None):
 
 # print message, useful for checking if it was successful
 def on_message(client, userdata, msg):
+    gameBegun, gameState, lobby_name, widerGameState, turnTime
     """
         Prints a mqtt message to stdout ( used as callback for subscribe )
         :param client: the client itself
@@ -73,12 +75,19 @@ def on_message(client, userdata, msg):
             print("Game has ended")
     elif(topic_list[-1] == "game_state"):
         gameState = msg.payload
+        lobby_name = topic_list[1]
         widerGameState = None
         print("board\n",msg.payload)
         turnTime = True
-    elif(topic_list[-1] == "game_state"):
-        gameState = msg.payload
-        widerGameState = None
+    elif(topic_list[0] == "teams"):
+        widerGameState = {"teammateNames": gameState['teammateNames'] + msg.payload['teammateNames'] \
+            , "teammatePositions": gameState['teammatePositions'] + msg.payload['teammatePositions'] \
+            , "enemyPositions": gameState['enemyPositions'] + msg.payload['enemyPositions'] \
+            , "currentPosition": gameState['currentPosition'] + msg.payload['currentPosition'] \
+            , "coin1": gameState['coin1'] + msg.payload['coin1'] \
+            , "coin2": gameState['coin2'] + msg.payload['coin2'] \
+            , "coin3": gameState['coin3'] + msg.payload['coin3'] \
+            , "walls": gameState['walls'] + msg.payload['walls']}
         print("board\n",msg.payload)
         turnTime = True
 
@@ -106,15 +115,16 @@ if __name__ == '__main__':
     client.on_publish = on_publish # Can comment out to not print when publishing to topics
 
     player_name = "P1"#input("Enter Name")
-    lobby_name = "Lobby1"
+    team_name = "ATEAM"
 
     client.subscribe(f"games/{lobby_name}/lobby")
     client.subscribe(f'games/{lobby_name}/+/game_state')
     client.subscribe(f'games/{lobby_name}/scores')
     client.subscribe(f'games/{lobby_name}/start')
     client.subscribe(f'games/{lobby_name}/stop')
+    client.subscribe(f'teams/{team_name}')
 
-    client.publish("player_ready", json.dumps({'player_name' : player_name}))
+    client.publish("player_ready", json.dumps({'player_name' : player_name, 'team_name' : team_name}))
 
     time.sleep(1) # Wait a second to resolve game start
     # client.publish(f"games/{lobby_name}/start", "START")
@@ -124,10 +134,12 @@ if __name__ == '__main__':
     # client.publish(f"games/{lobby_name}/start", "STOP")
     
     client.loop_start()
-    while(not gameBegun): time.sleep(1)
+    # while(not gameBegun): time.sleep(1)
     while(gameBegun):
-        while(not turnTime): time.sleep(0.1)
-        
+        print(f"Lobby:{lobby_name}\n")
+        # while(not turnTime): time.sleep(0.1)
+        client.publish(f"teams/{team_name}/{player_name}", json.dumps(gameState))
+        while(widerGameState == None): time.sleep(1)
         
         
         turnTime = False
