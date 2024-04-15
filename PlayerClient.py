@@ -113,7 +113,7 @@ if __name__ == '__main__':
                                         'team_name':'BTeam',
                                         'player_name' : player_3}))
         global player_4
-        player_4= players[3]['player_name']       
+        player_4 = players[3]['player_name']       
         client.publish("new_game", json.dumps({'lobby_name':lobby_name,
                                         'team_name':'BTeam',
                                         'player_name' : player_4}))

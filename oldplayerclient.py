@@ -4,16 +4,8 @@ from dotenv import load_dotenv
 
 import paho.mqtt.client as paho
 from paho import mqtt
-import time, random
+import time
 
-gameBegun = False
-gameState = None
-widerGameState = None
-turnTime = False
-
-player_name = "P1"
-lobby_name = ""
-team_name = "ATEAM"
 
 # setting callbacks for different events to see if it works, print the message etc.
 def on_connect(client, userdata, flags, rc, properties=None):
@@ -55,7 +47,6 @@ def on_subscribe(client, userdata, mid, granted_qos, properties=None):
 
 # print message, useful for checking if it was successful
 def on_message(client, userdata, msg):
-    gameBegun, gameState, lobby_name, widerGameState, turnTime
     """
         Prints a mqtt message to stdout ( used as callback for subscribe )
         :param client: the client itself
@@ -64,32 +55,6 @@ def on_message(client, userdata, msg):
     """
 
     print("message: " + msg.topic + " " + str(msg.qos) + " " + str(msg.payload))
-    topic_list = msg.topic.split("/")
-    
-    if(topic_list[-1] == "start"):
-        if(msg.payload == "START"):
-            gameBegun = True
-            print("Game has begun")
-        elif(msg.payload == "STOP"):
-            gameBegun = False
-            print("Game has ended")
-    elif(topic_list[-1] == "game_state"):
-        gameState = msg.payload
-        lobby_name = topic_list[1]
-        widerGameState = None
-        print("board\n",msg.payload)
-        turnTime = True
-    elif(topic_list[0] == "teams"):
-        widerGameState = {"teammateNames": gameState['teammateNames'] + msg.payload['teammateNames'] \
-            , "teammatePositions": gameState['teammatePositions'] + msg.payload['teammatePositions'] \
-            , "enemyPositions": gameState['enemyPositions'] + msg.payload['enemyPositions'] \
-            , "currentPosition": gameState['currentPosition'] + msg.payload['currentPosition'] \
-            , "coin1": gameState['coin1'] + msg.payload['coin1'] \
-            , "coin2": gameState['coin2'] + msg.payload['coin2'] \
-            , "coin3": gameState['coin3'] + msg.payload['coin3'] \
-            , "walls": gameState['walls'] + msg.payload['walls']}
-        print("wider_game_state\n", widerGameState)
-        turnTime = True
 
 
 if __name__ == '__main__':
@@ -100,7 +65,7 @@ if __name__ == '__main__':
     username = os.environ.get('USER_NAME')
     password = os.environ.get('PASSWORD')
 
-    client = paho.Client(callback_api_version=paho.CallbackAPIVersion.VERSION1, client_id="Player" + str(random.randint(0,65565)), userdata=None, protocol=paho.MQTTv5)
+    client = paho.Client(callback_api_version=paho.CallbackAPIVersion.VERSION1, client_id="Player1", userdata=None, protocol=paho.MQTTv5)
     
     # enable TLS for secure connection
     client.tls_set(tls_version=mqtt.client.ssl.PROTOCOL_TLS)
@@ -114,36 +79,35 @@ if __name__ == '__main__':
     client.on_message = on_message
     client.on_publish = on_publish # Can comment out to not print when publishing to topics
 
-    player_name = input("Enter Name")
-    team_name = input("Enter Team")
+    lobby_name = "TestLobby"
+    player_1 = "Player1"
+    player_2 = "Player2"
+    player_3 = "Player3"
 
     client.subscribe(f"games/{lobby_name}/lobby")
     client.subscribe(f'games/{lobby_name}/+/game_state')
     client.subscribe(f'games/{lobby_name}/scores')
-    client.subscribe(f'games/{lobby_name}/start')
-    client.subscribe(f'games/{lobby_name}/stop')
-    client.subscribe(f'teams/{team_name}')
 
-    client.publish("player_ready", json.dumps({'player_name' : player_name, 'team_name' : team_name}))
+    client.publish("new_game", json.dumps({'lobby_name':lobby_name,
+                                            'team_name':'ATeam',
+                                            'player_name' : player_1}))
+    
+    client.publish("new_game", json.dumps({'lobby_name':lobby_name,
+                                            'team_name':'BTeam',
+                                            'player_name' : player_2}))
+    
+    client.publish("new_game", json.dumps({'lobby_name':lobby_name,
+                                        'team_name':'BTeam',
+                                        'player_name' : player_3}))
 
     time.sleep(1) # Wait a second to resolve game start
-    # client.publish(f"games/{lobby_name}/start", "START")
+    client.publish(f"games/{lobby_name}/start", "START")
+    # games/{lobby_name}/{player_name}/game_state - subscribe to it to see when the game has started and receive the following data as json (all MQTT messages comes in as a byte array) that you can retrieve using json.loads(): 
+    
     # client.publish(f"games/{lobby_name}/{player_1}/move", "UP")
     # client.publish(f"games/{lobby_name}/{player_2}/move", "DOWN")
-    # client.publish(f"games/{lobby_name}/{player_3}/move", "DOWN")
-    # client.publish(f"games/{lobby_name}/start", "STOP")
-    
-    client.loop_start()
-    # while(not gameBegun): time.sleep(1)
-    while(1 or gameBegun):
-        print(f"Lobby:{lobby_name}\n")
-        # while(not turnTime): time.sleep(0.1)
-        client.publish(f"teams/{team_name}/{player_name}", json.dumps(gameState))
-        while(widerGameState == None): time.sleep(1)
-        
-        
-        turnTime = False
-    
+    #  client.publish(f"games/{lobby_name}/{player_3}/move", "DOWN")
+    client.publish(f"games/{lobby_name}/start", "STOP")
 
 
-    
+    client.loop_forever()
