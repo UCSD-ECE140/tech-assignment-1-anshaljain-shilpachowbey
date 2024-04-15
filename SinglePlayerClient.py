@@ -15,6 +15,7 @@ player_name = "P1"
 lobby_name = "lobby"
 team_name = "ATEAM"
 
+allowed_moves = ["UP", "DOWN", "LEFT", "RIGHT"]
 
 def printGamestate(game_state):
     print("___________")
@@ -221,4 +222,11 @@ if __name__ == '__main__':
                     elif gameState['currentPosition'][1] > closest_coin[1]:
                         client.publish(f"games/{lobby_name}/{player_name}/move", "DOWB")
                     exit()  
+                    move = ""
+                    while(1):
+                        move = input("Where do you want to move?")
+                        if(move in allowed_moves):
+                            break
+                    client.publish(f"games/{lobby_name}/{player_name}/move", move)
+                    # exit()  
                     turnTime = False
