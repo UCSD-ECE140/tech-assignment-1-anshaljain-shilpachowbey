@@ -130,6 +130,10 @@ def on_message(client, userdata, msg):
                 , "coin3": gameState['coin3'] +         pay['coin3'] \
                 , "walls": gameState['walls'] +         pay['walls']}
             print("wider_game_state\n", widerGameState)
+    elif("Game Over" in str(msg.payload)):
+        gameBegun = False
+        print("GAME OVER")
+        exit()
 
 
 if __name__ == '__main__':
@@ -269,3 +273,4 @@ if __name__ == '__main__':
                     #        break
                     #client.publish(f"games/{lobby_name}/{player_name}/move", move)
                     # exit()  
+            
