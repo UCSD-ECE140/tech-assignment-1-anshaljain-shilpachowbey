@@ -58,9 +58,9 @@ def on_message(client, userdata, msg):
         :param msg: the message with topic and payload
     """
     if msg.topic == 'player_ready':
-        players.append(json.loads(str(msg.payload)))
+        players.append(json.loads(msg.payload))
     if '/move' in msg.topic:
-        moves.append(json.loads(str(msg.payload)))
+        moves.append(json.loads(msg.payload))
 
     print("message: " + msg.topic + " " + str(msg.qos) + " " + str(msg.payload))
 
@@ -73,7 +73,7 @@ if __name__ == '__main__':
     username = os.environ.get('USER_NAME')
     password = os.environ.get('PASSWORD')
 
-    client = paho.Client(callback_api_version=paho.CallbackAPIVersion.VERSION1, client_id="Player1", userdata=None, protocol=paho.MQTTv5)
+    client = paho.Client(callback_api_version=paho.CallbackAPIVersion.VERSION1, client_id="Lobby", userdata=None, protocol=paho.MQTTv5)
     
     # enable TLS for secure connection
     client.tls_set(tls_version=mqtt.client.ssl.PROTOCOL_TLS)
@@ -97,33 +97,35 @@ if __name__ == '__main__':
     global player_2
     global player_3
     global player_4
-    if len(players) == 4:
-        player_1 = players[0]['player_name']
-        client.publish("new_game", json.dumps({'lobby_name':lobby_name,
-                                            'team_name': players[0]['team_name'],
-                                            'player_name' : player_1}))
-        player_2 = players[1]['player_name']
-        client.publish("new_game", json.dumps({'lobby_name':lobby_name,
-                                            'team_name':players[1]['team_name'],
-                                            'player_name' : player_2}))
-        
-        player_3 = players[2]['player_name']
-        client.publish("new_game", json.dumps({'lobby_name':lobby_name,
-                                        'team_name': players[2]['team_name'],
-                                        'player_name' : player_3}))
-        
-        player_4= players[3]['player_name']       
-        client.publish("new_game", json.dumps({'lobby_name':lobby_name,
-                                        'team_name': players[3]['team_name'],
-                                        'player_name' : player_4}))
+    
+    client.loop_start()
+    
+    while(len(players) < 4): time.sleep(1)
+    player_1 = players[0]['player_name']
+    client.publish("new_game", json.dumps({'lobby_name':lobby_name,
+                                        'team_name': players[0]['team_name'],
+                                        'player_name' : player_1}))
+    player_2 = players[1]['player_name']
+    client.publish("new_game", json.dumps({'lobby_name':lobby_name,
+                                        'team_name':players[1]['team_name'],
+                                        'player_name' : player_2}))
+    
+    player_3 = players[2]['player_name']
+    client.publish("new_game", json.dumps({'lobby_name':lobby_name,
+                                    'team_name': players[2]['team_name'],
+                                    'player_name' : player_3}))
+    
+    player_4= players[3]['player_name']       
+    client.publish("new_game", json.dumps({'lobby_name':lobby_name,
+                                    'team_name': players[3]['team_name'],
+                                    'player_name' : player_4}))
 
-        time.sleep(1) # Wait a second to resolve game start
-        client.publish(f"games/{lobby_name}/start", "START")
-        client.subscribe(f"games/{lobby_name}/{player_1}/game_state")
-        client.subscribe(f"games/{lobby_name}/{player_2}/game_state")
-        client.subscribe(f"games/{lobby_name}/{player_3}/game_state")
-        client.subscribe(f"games/{lobby_name}/{player_4}/game_state")
-        # games/{lobby_name}/{player_name}/game_state - subscribe to it to see when the game has started and receive the following data as json (all MQTT messages comes in as a byte array) that you can retrieve using json.loads(): 
-        
-        client.publish(f"games/{lobby_name}/start", "STOP")
-    client.loop_forever()
+    time.sleep(1) # Wait a second to resolve game start
+    client.publish(f"games/{lobby_name}/start", "START")
+    client.subscribe(f"games/{lobby_name}/{player_1}/game_state")
+    client.subscribe(f"games/{lobby_name}/{player_2}/game_state")
+    client.subscribe(f"games/{lobby_name}/{player_3}/game_state")
+    client.subscribe(f"games/{lobby_name}/{player_4}/game_state")
+    # games/{lobby_name}/{player_name}/game_state - subscribe to it to see when the game has started and receive the following data as json (all MQTT messages comes in as a byte array) that you can retrieve using json.loads(): 
+    
+    # client.publish(f"games/{lobby_name}/start", "STOP")

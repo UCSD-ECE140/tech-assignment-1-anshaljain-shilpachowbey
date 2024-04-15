@@ -59,9 +59,9 @@ def on_message(client, userdata, msg):
     """
     
     if msg.topic == 'player_ready':
-        players.append(json.loads(str(msg.payload)))
+        players.append(msg.payload)
     if '/move' in msg.topic:
-        moves.append(json.loads(str(msg.payload)))
+        moves.append(msg.payload)
 
     print("message: " + msg.topic + " " + str(msg.qos) + " " + str(msg.payload))
 

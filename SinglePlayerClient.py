@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 import paho.mqtt.client as paho
 from paho import mqtt
-import time, random
+import time, random, sys
 
 gameBegun = False
 gameState = None
@@ -74,20 +74,21 @@ def on_message(client, userdata, msg):
             gameBegun = False
             print("Game has ended")
     elif(topic_list[-1] == "game_state"):
-        gameState = msg.payload
+        gameState = json.loads(msg.payload)
         lobby_name = topic_list[1]
         widerGameState = None
         print("board\n",msg.payload)
         turnTime = True
     elif(topic_list[0] == "teams"):
-        widerGameState = {"teammateNames": gameState['teammateNames'] + msg.payload['teammateNames'] \
-            , "teammatePositions": gameState['teammatePositions'] + msg.payload['teammatePositions'] \
-            , "enemyPositions": gameState['enemyPositions'] + msg.payload['enemyPositions'] \
-            , "currentPosition": gameState['currentPosition'] + msg.payload['currentPosition'] \
-            , "coin1": gameState['coin1'] + msg.payload['coin1'] \
-            , "coin2": gameState['coin2'] + msg.payload['coin2'] \
-            , "coin3": gameState['coin3'] + msg.payload['coin3'] \
-            , "walls": gameState['walls'] + msg.payload['walls']}
+        pay = json.loads(msg.payload)
+        widerGameState = {"teammateNames": gameState['teammateNames'] +         pay['teammateNames'] \
+            , "teammatePositions": gameState['teammatePositions'] +         pay['teammatePositions'] \
+            , "enemyPositions": gameState['enemyPositions'] +         pay['enemyPositions'] \
+            , "currentPosition": gameState['currentPosition'] +         pay['currentPosition'] \
+            , "coin1": gameState['coin1'] +         pay['coin1'] \
+            , "coin2": gameState['coin2'] +         pay['coin2'] \
+            , "coin3": gameState['coin3'] +         pay['coin3'] \
+            , "walls": gameState['walls'] +         pay['walls']}
         print("wider_game_state\n", widerGameState)
         turnTime = True
 
@@ -99,8 +100,17 @@ if __name__ == '__main__':
     broker_port = int(os.environ.get('BROKER_PORT'))
     username = os.environ.get('USER_NAME')
     password = os.environ.get('PASSWORD')
+    
+    if(sys.argv[1] == None):
+        player_name = input("Enter Name")
+    else:
+        player_name = sys.argv[1]
+    if(sys.argv[2] == None):
+        team_name = input("Enter Team")
+    else:
+        team_name = sys.argv[2]
 
-    client = paho.Client(callback_api_version=paho.CallbackAPIVersion.VERSION1, client_id="Player" + str(random.randint(0,65565)), userdata=None, protocol=paho.MQTTv5)
+    client = paho.Client(callback_api_version=paho.CallbackAPIVersion.VERSION1, client_id="Player_" + player_name, userdata=None, protocol=paho.MQTTv5)
     
     # enable TLS for secure connection
     client.tls_set(tls_version=mqtt.client.ssl.PROTOCOL_TLS)
@@ -113,9 +123,7 @@ if __name__ == '__main__':
     client.on_subscribe = on_subscribe # Can comment out to not print when subscribing to new topics
     client.on_message = on_message
     client.on_publish = on_publish # Can comment out to not print when publishing to topics
-
-    player_name = input("Enter Name")
-    team_name = input("Enter Team")
+    
 
     client.subscribe(f"games/{lobby_name}/lobby")
     client.subscribe(f'games/{lobby_name}/+/game_state')
@@ -136,7 +144,7 @@ if __name__ == '__main__':
     client.loop_start()
     # while(not gameBegun): time.sleep(1)
     while(1 or gameBegun):
-        print(f"Lobby:{lobby_name}\n")
+        print(f"Lobby:{lobby_name}\nPlayer:{player_name}\nTeam:{team_name}")
         # while(not turnTime): time.sleep(0.1)
         client.publish(f"teams/{team_name}/{player_name}", json.dumps(gameState))
         while(widerGameState == None): time.sleep(1)

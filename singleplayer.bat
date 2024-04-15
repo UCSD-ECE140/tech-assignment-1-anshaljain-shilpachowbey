@@ -1,3 +1,3 @@
 @echo off
-python SinglePlayerClient.py
+python SinglePlayerClient.py %1 %2
 pause
