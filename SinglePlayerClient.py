@@ -257,6 +257,7 @@ if __name__ == '__main__':
                                 print("RANDOM " + chosen_move)
                                 client.publish(f"games/{lobby_name}/{player_name}/move", chosen_move)
                                 break
+                    turnTime = False
                     #move = ""
                     #while(1):
                     #    move = input("Where do you want to move?")
