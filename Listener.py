@@ -1,24 +1,7 @@
-#
-# Copyright 2021 HiveMQ GmbH
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
 import time
-import random
-
+import matplotlib.pyplot as plt
 import paho.mqtt.client as paho
 from paho import mqtt
-
 import os
 from dotenv import load_dotenv
 
@@ -52,9 +35,6 @@ def on_publish(client, userdata, mid, properties=None):
     print("mid: " + str(mid))
 
 
-data = {}
-
-
 # print which topic was subscribed to
 def on_subscribe(client, userdata, mid, granted_qos, properties=None):
     """
@@ -76,42 +56,27 @@ def on_message(client, userdata, msg):
         :param userdata: userdata is set when initiating the client, here it is userdata=None
         :param msg: the message with topic and payload
     """
-    data[msg.topic] = msg.payload.decode("utf-8")
     print(msg.topic + " " + str(msg.qos) + " " + str(msg.payload))
-    print("date:" + data)
 
 
-# using MQTT version 5 here, for 3.1.1: MQTTv311, 3.1: MQTTv31
 # userdata is user defined data of any type, updated by user_data_set()
 # client_id is the given name of the client
-client1 = paho.Client(callback_api_version=paho.CallbackAPIVersion.VERSION1, client_id="client1", userdata=None, protocol=paho.MQTTv5)
-client2 = paho.Client(callback_api_version=paho.CallbackAPIVersion.VERSION1, client_id="client2", userdata=None, protocol=paho.MQTTv5)
+client = paho.Client(callback_api_version=paho.CallbackAPIVersion.VERSION1, client_id="", userdata=None, protocol=paho.MQTTv5)
+client.on_connect = on_connect
 
 # enable TLS for secure connection
-client1.tls_set(tls_version=mqtt.client.ssl.PROTOCOL_TLS)
-client2.tls_set(tls_version=mqtt.client.ssl.PROTOCOL_TLS)
-
+client.tls_set(tls_version=mqtt.client.ssl.PROTOCOL_TLS)
 # set username and password
-client1.username_pw_set(username, password)
-client2.username_pw_set(username, password)
-
+client.username_pw_set(username, password)
 # connect to HiveMQ Cloud on port 8883 (default for MQTT)
-client1.connect(url, 8883)
-client2.connect(url, 8883)
+client.connect(url, 8883)
 
-# assigns functions to event handlers of the MQTT client object
-client1.on_connect = on_connect
-client1.on_message = on_message
-client1.on_publish = on_publish
-client2.on_connect = on_connect
-client2.on_message = on_message
-client2.on_publish = on_publish
+# setting callbacks, use separate functions like above for better visibility
+client.on_subscribe = on_subscribe
+client.on_message = on_message
+client.on_publish = on_publish
 
-client1.loop_start()
-client2.loop_start()
+client.subscribe("client1")
+client.subscribe("client2")
 
-
-while True:
-    client1.publish('client1', random.randint(1, 100))
-    client2.publish('client2', random.randint(1, 100))
-    time.sleep(3)
+client.loop_start()
