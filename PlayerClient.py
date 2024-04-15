@@ -6,6 +6,10 @@ import paho.mqtt.client as paho
 from paho import mqtt
 import time
 
+global players 
+players = []
+global moves
+moves = []
 
 # setting callbacks for different events to see if it works, print the message etc.
 def on_connect(client, userdata, flags, rc, properties=None):
@@ -53,7 +57,12 @@ def on_message(client, userdata, msg):
         :param userdata: userdata is set when initiating the client, here it is userdata=None
         :param msg: the message with topic and payload
     """
-    # add logic to send messages and publish
+    
+    if msg.topic == 'player_ready':
+        players.append(json.loads(str(msg.payload)))
+    if '/move' in msg.topic:
+        moves.append(json.loads(str(msg.payload)))
+
     print("message: " + msg.topic + " " + str(msg.qos) + " " + str(msg.payload))
 
 
@@ -79,34 +88,39 @@ if __name__ == '__main__':
     client.on_message = on_message
     client.on_publish = on_publish # Can comment out to not print when publishing to topics
 
+    global lobby_name 
     lobby_name = "TestLobby"
-    player_1 = "Player1"
-    player_2 = "Player2"
-    player_3 = "Player3"
 
     client.subscribe(f"games/{lobby_name}/lobby")
     client.subscribe(f'games/{lobby_name}/+/game_state')
     client.subscribe(f'games/{lobby_name}/scores')
+    client.subscribe(f'player_ready')
 
-    client.publish("new_game", json.dumps({'lobby_name':lobby_name,
+    if players.length() == 4:
+        global player_1
+        player_1 = players[0]['player_name']
+        client.publish("new_game", json.dumps({'lobby_name':lobby_name,
                                             'team_name':'ATeam',
                                             'player_name' : player_1}))
-    
-    client.publish("new_game", json.dumps({'lobby_name':lobby_name,
-                                            'team_name':'BTeam',
+        global player_2
+        player_2 = players[1]['player_name']
+        client.publish("new_game", json.dumps({'lobby_name':lobby_name,
+                                            'team_name':'ATeam',
                                             'player_name' : player_2}))
-    
-    client.publish("new_game", json.dumps({'lobby_name':lobby_name,
+        global player_3
+        player_3 = players[2]['player_name']
+        client.publish("new_game", json.dumps({'lobby_name':lobby_name,
                                         'team_name':'BTeam',
                                         'player_name' : player_3}))
+        global player_4
+        player_4= players[3]['player_name']       
+        client.publish("new_game", json.dumps({'lobby_name':lobby_name,
+                                        'team_name':'BTeam',
+                                        'player_name' : player_4}))
 
-    time.sleep(1) # Wait a second to resolve game start
-    client.publish(f"games/{lobby_name}/start", "START")
-    while 
-    # client.publish(f"games/{lobby_name}/{player_1}/move", "UP")
-    # client.publish(f"games/{lobby_name}/{player_2}/move", "DOWN")
-    # client.publish(f"games/{lobby_name}/{player_3}/move", "DOWN")
-    client.publish(f"games/{lobby_name}/start", "STOP")
+        time.sleep(1) # wait a second to resolve game start
+        client.publish(f"games/{lobby_name}/start", "START")
+        # players make moves
+        client.publish(f"games/{lobby_name}/start", "STOP")
 
-
-    client.loop_forever()
+        client.loop_forever()
