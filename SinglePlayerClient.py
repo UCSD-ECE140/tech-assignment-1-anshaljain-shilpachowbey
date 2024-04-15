@@ -230,18 +230,12 @@ if __name__ == '__main__':
                                 print("MOVING LEFT")
                                 client.publish(f"games/{lobby_name}/{player_name}/move", "LEFT")
                                 not_moved = False
-                        if gameState['currentPosition'][1] < closest_coin[1] and not_moved:
-                            new_pos = [gameState['currentPosition'][0],gameState['currentPosition'][1]+1]
-                            if new_pos not in gameState['walls'] and new_pos not in gameState["enemyPositions"] and new_pos not in gameState["teammatePositions"]:
                         if (gameState['currentPosition'][1] < closest_coin[1] and not_moved):
                             new_pos = [gameState['currentPosition'][0],gameState['currentPosition'][1]+1]
                             if ((new_pos not in gameState["walls"]) and (new_pos not in gameState["enemyPositions"]) and (new_pos not in gameState["teammatePositions"])):
                                 print("MOVING UP")
                                 client.publish(f"games/{lobby_name}/{player_name}/move", "UP")
                                 not_moved = False
-                        if gameState['currentPosition'][1] > closest_coin[1] and not_moved:
-                            new_pos = [gameState['currentPosition'][0],gameState['currentPosition'][1]-1]
-                            if new_pos not in gameState['walls'] and new_pos not in gameState["enemyPositions"] and new_pos not in gameState["teammatePositions"]:
                         if (gameState['currentPosition'][1] > closest_coin[1] and not_moved):
                             new_pos = [gameState['currentPosition'][0],gameState['currentPosition'][1]-1]
                             if ((new_pos not in gameState["walls"]) and (new_pos not in gameState["enemyPositions"]) and (new_pos not in gameState["teammatePositions"])):
