@@ -93,36 +93,37 @@ if __name__ == '__main__':
     client.subscribe(f'games/{lobby_name}/+/game_state')
     client.subscribe(f'games/{lobby_name}/scores')
     client.subscribe(f'player_ready')
-
-    if players.length() == 4:
-        global player_1
+    global player_1
+    global player_2
+    global player_3
+    global player_4
+    if len(players) == 4:
         player_1 = players[0]['player_name']
         client.publish("new_game", json.dumps({'lobby_name':lobby_name,
                                             'team_name': players[0]['team_name'],
                                             'player_name' : player_1}))
-        global player_2
         player_2 = players[1]['player_name']
         client.publish("new_game", json.dumps({'lobby_name':lobby_name,
                                             'team_name':players[1]['team_name'],
                                             'player_name' : player_2}))
-        global player_3
+        
         player_3 = players[2]['player_name']
         client.publish("new_game", json.dumps({'lobby_name':lobby_name,
                                         'team_name': players[2]['team_name'],
                                         'player_name' : player_3}))
-        global player_4
+        
         player_4= players[3]['player_name']       
         client.publish("new_game", json.dumps({'lobby_name':lobby_name,
                                         'team_name': players[3]['team_name'],
                                         'player_name' : player_4}))
 
-    time.sleep(1) # Wait a second to resolve game start
-    client.publish(f"games/{lobby_name}/start", "START")
-    client.subscribe(f"games/{lobby_name}/{player_1}/game_state")
-    client.subscribe(f"games/{lobby_name}/{player_2}/game_state")
-    client.subscribe(f"games/{lobby_name}/{player_3}/game_state")
-    client.subscribe(f"games/{lobby_name}/{player_4}/game_state")
-    # games/{lobby_name}/{player_name}/game_state - subscribe to it to see when the game has started and receive the following data as json (all MQTT messages comes in as a byte array) that you can retrieve using json.loads(): 
-    
-    client.publish(f"games/{lobby_name}/start", "STOP")
+        time.sleep(1) # Wait a second to resolve game start
+        client.publish(f"games/{lobby_name}/start", "START")
+        client.subscribe(f"games/{lobby_name}/{player_1}/game_state")
+        client.subscribe(f"games/{lobby_name}/{player_2}/game_state")
+        client.subscribe(f"games/{lobby_name}/{player_3}/game_state")
+        client.subscribe(f"games/{lobby_name}/{player_4}/game_state")
+        # games/{lobby_name}/{player_name}/game_state - subscribe to it to see when the game has started and receive the following data as json (all MQTT messages comes in as a byte array) that you can retrieve using json.loads(): 
+        
+        client.publish(f"games/{lobby_name}/start", "STOP")
     client.loop_forever()

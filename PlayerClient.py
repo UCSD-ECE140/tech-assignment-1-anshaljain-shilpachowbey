@@ -96,7 +96,7 @@ if __name__ == '__main__':
     client.subscribe(f'games/{lobby_name}/scores')
     client.subscribe(f'player_ready')
 
-    if players.length() == 4:
+    if len(players) == 4:
         global player_1
         player_1 = players[0]['player_name']
         client.publish("new_game", json.dumps({'lobby_name':lobby_name,
