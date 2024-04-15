@@ -194,5 +194,31 @@ if __name__ == '__main__':
                     client.publish(f"teams/{team_name}/{player_name}", json.dumps(gameState))
                     while(widerGameState == None): time.sleep(1)
                     printGamestate(widerGameState)
+
+                    closest_coin = []
+                    dist = 10
+                    for coin in gameState['coin1']:
+                        temp = abs((gameState['currentPosition'][1]-coin[1])+ (gameState['currentPosition'][0]-coin[0]))
+                        if dist>temp:
+                            dist = temp
+                            closest_coin = coin
+                    for coin in gameState['coin2']:
+                        temp = abs((gameState['currentPosition'][1]-coin[1])+ (gameState['currentPosition'][0]-coin[0]))
+                        if dist>temp:
+                            dist = temp
+                            closest_coin = coin
+                    for coin in gameState['coin3']:
+                        temp = abs((gameState['currentPosition'][1]-coin[1])+ (gameState['currentPosition'][0]-coin[0]))
+                        if dist>temp:
+                            dist = temp
+                            closest_coin = coin
+                    if gameState['currentPosition'][0] < closest_coin[0]:
+                        client.publish(f"games/{lobby_name}/{player_name}/move", "RIGHT")
+                    elif gameState['currentPosition'][0] > closest_coin[0]:
+                        client.publish(f"games/{lobby_name}/{player_name}/move", "LEFT")
+                    elif gameState['currentPosition'][1] < closest_coin[1]:
+                        client.publish(f"games/{lobby_name}/{player_name}/move", "UP")
+                    elif gameState['currentPosition'][1] > closest_coin[1]:
+                        client.publish(f"games/{lobby_name}/{player_name}/move", "DOWB")
                     exit()  
                     turnTime = False

@@ -127,5 +127,4 @@ if __name__ == '__main__':
     client.subscribe(f"games/{lobby_name}/{player_3}/game_state")
     client.subscribe(f"games/{lobby_name}/{player_4}/game_state")
     # games/{lobby_name}/{player_name}/game_state - subscribe to it to see when the game has started and receive the following data as json (all MQTT messages comes in as a byte array) that you can retrieve using json.loads(): 
-    
     # client.publish(f"games/{lobby_name}/start", "STOP")
