@@ -15,6 +15,8 @@ player_name = "P1"
 lobby_name = "lobby"
 team_name = "ATEAM"
 
+c = 3
+
 allowed_moves = ["UP", "DOWN", "LEFT", "RIGHT"]
 
 def printGamestate(game_state):
@@ -130,10 +132,6 @@ def on_message(client, userdata, msg):
                 , "coin3": gameState['coin3'] +         pay['coin3'] \
                 , "walls": gameState['walls'] +         pay['walls']}
             print("wider_game_state\n", widerGameState)
-    elif("Game Over" in str(msg.payload)):
-        gameBegun = False
-        print("GAME OVER")
-        exit()
 
 
 if __name__ == '__main__':
@@ -200,77 +198,78 @@ if __name__ == '__main__':
                     while(widerGameState == None): time.sleep(1)
                     printGamestate(widerGameState)
 
-                    walls = gameState['walls']
-                    closest_coin = None
-                    dist = 10
-                    for coin in gameState['coin1']:
-                        temp = abs((gameState['currentPosition'][1]-coin[1])+ (gameState['currentPosition'][0]-coin[0]))
-                        if dist>temp:
-                            dist = temp
-                            closest_coin = coin
-                    for coin in gameState['coin2']:
-                        temp = abs((gameState['currentPosition'][1]-coin[1])+ (gameState['currentPosition'][0]-coin[0]))
-                        if dist>temp:
-                            dist = temp
-                            closest_coin = coin
-                    for coin in gameState['coin3']:
-                        temp = abs((gameState['currentPosition'][1]-coin[1])+ (gameState['currentPosition'][0]-coin[0]))
-                        if dist>temp:
-                            dist = temp
-                            closest_coin = coin
-                    print("closest coin is " + str(closest_coin))
-        
-                    if(closest_coin != None):
-                        not_moved = True
-                        # if closest coin is RIGHT of current position
-                        if gameState['currentPosition'][0] < closest_coin[0] and not_moved:
-                            new_pos = [gameState['currentPosition'][0]+1,gameState['currentPosition'][1]]
-                            if new_pos not in gameState['walls'] and new_pos not in gameState["enemyPositions"] and new_pos not in gameState["teammatePositions"]:
-                                print("MOVING DOWN")
-                                client.publish(f"games/{lobby_name}/{player_name}/move", "DOWN")
-                                not_moved = False
-                        # if closest coin is LEFT of current position
-                        if gameState['currentPosition'][0] > closest_coin[0] and not_moved:
-                            new_pos = [gameState['currentPosition'][0]-1,gameState['currentPosition'][1]]
-                            if new_pos not in gameState['walls'] and new_pos not in gameState["enemyPositions"] and new_pos not in gameState["teammatePositions"]:
-                                print("MOVING UP")
-                                client.publish(f"games/{lobby_name}/{player_name}/move", "UP")
-                                not_moved = False
-                        # if closest coin is above (UP) current position
-                        if (gameState['currentPosition'][1] < closest_coin[1] and not_moved):
-                            new_pos = [gameState['currentPosition'][0],gameState['currentPosition'][1]+1]
-                            if ((new_pos not in gameState["walls"]) and (new_pos not in gameState["enemyPositions"]) and (new_pos not in gameState["teammatePositions"])):
-                                print("MOVING RIGHT")
-                                client.publish(f"games/{lobby_name}/{player_name}/move", "RIGHT")
-                                not_moved = False
-                        # if closest coin is below (DOWN) of current position
-                        if (gameState['currentPosition'][1] > closest_coin[1] and not_moved):
-                            new_pos = [gameState['currentPosition'][0],gameState['currentPosition'][1]-1]
-                            if ((new_pos not in gameState["walls"]) and (new_pos not in gameState["enemyPositions"]) and (new_pos not in gameState["teammatePositions"])):
-                                print("MOVING LEFT")
-                                client.publish(f"games/{lobby_name}/{player_name}/move", "LEFT")
-                                not_moved = False
-                    if(closest_coin == None or not_moved):
-                        while(1):
-                            chosen_move = allowed_moves[random.randint(0, 3)]
-                            if chosen_move == 'DOWN':
-                                new_pos = [gameState['currentPosition'][0]+1,gameState['currentPosition'][1]]
-                            elif chosen_move == 'UP':
-                                new_pos = [gameState['currentPosition'][0]-1,gameState['currentPosition'][1]]
-                            elif chosen_move == 'LEFT':
-                                new_pos = [gameState['currentPosition'][0],gameState['currentPosition'][1]+1]
-                            elif chosen_move == 'RIGHT':
-                                new_pos = [gameState['currentPosition'][0],gameState['currentPosition'][1]-1]
-                            if (new_pos not in gameState["walls"]) and (new_pos not in gameState["enemyPositions"]) and (new_pos not in gameState["teammatePositions"]) and new_pos[0]<10 and new_pos[0]>-1 and new_pos[1]<10 and new_pos[1]>-1 :
-                                print("RANDOM " + chosen_move)
-                                client.publish(f"games/{lobby_name}/{player_name}/move", chosen_move)
-                                break
-                    turnTime = False
-                    #move = ""
-                    #while(1):
-                    #    move = input("Where do you want to move?")
-                    #    if(move in allowed_moves):
-                    #        break
-                    #client.publish(f"games/{lobby_name}/{player_name}/move", move)
-                    # exit()  
+                    if(c == 3):
+                        walls = gameState['walls']
+                        closest_coin = None
+                        dist = 10
+                        for coin in gameState['coin1']:
+                            temp = abs((gameState['currentPosition'][1]-coin[1])+ (gameState['currentPosition'][0]-coin[0]))
+                            if dist>temp:
+                                dist = temp
+                                closest_coin = coin
+                        for coin in gameState['coin2']:
+                            temp = abs((gameState['currentPosition'][1]-coin[1])+ (gameState['currentPosition'][0]-coin[0]))
+                            if dist>temp:
+                                dist = temp
+                                closest_coin = coin
+                        for coin in gameState['coin3']:
+                            temp = abs((gameState['currentPosition'][1]-coin[1])+ (gameState['currentPosition'][0]-coin[0]))
+                            if dist>temp:
+                                dist = temp
+                                closest_coin = coin
+                        print("closest coin is " + str(closest_coin))
             
+                        if(closest_coin != None):
+                            not_moved = True
+                            # if closest coin is RIGHT of current position
+                            if gameState['currentPosition'][0] < closest_coin[0] and not_moved:
+                                new_pos = [gameState['currentPosition'][0]+1,gameState['currentPosition'][1]]
+                                if new_pos not in gameState['walls'] and new_pos not in gameState["enemyPositions"] and new_pos not in gameState["teammatePositions"]:
+                                    print("MOVING DOWN")
+                                    client.publish(f"games/{lobby_name}/{player_name}/move", "DOWN")
+                                    not_moved = False
+                            # if closest coin is LEFT of current position
+                            if gameState['currentPosition'][0] > closest_coin[0] and not_moved:
+                                new_pos = [gameState['currentPosition'][0]-1,gameState['currentPosition'][1]]
+                                if new_pos not in gameState['walls'] and new_pos not in gameState["enemyPositions"] and new_pos not in gameState["teammatePositions"]:
+                                    print("MOVING UP")
+                                    client.publish(f"games/{lobby_name}/{player_name}/move", "UP")
+                                    not_moved = False
+                            # if closest coin is above (UP) current position
+                            if (gameState['currentPosition'][1] < closest_coin[1] and not_moved):
+                                new_pos = [gameState['currentPosition'][0],gameState['currentPosition'][1]+1]
+                                if ((new_pos not in gameState["walls"]) and (new_pos not in gameState["enemyPositions"]) and (new_pos not in gameState["teammatePositions"])):
+                                    print("MOVING RIGHT")
+                                    client.publish(f"games/{lobby_name}/{player_name}/move", "RIGHT")
+                                    not_moved = False
+                            # if closest coin is below (DOWN) of current position
+                            if (gameState['currentPosition'][1] > closest_coin[1] and not_moved):
+                                new_pos = [gameState['currentPosition'][0],gameState['currentPosition'][1]-1]
+                                if ((new_pos not in gameState["walls"]) and (new_pos not in gameState["enemyPositions"]) and (new_pos not in gameState["teammatePositions"])):
+                                    print("MOVING LEFT")
+                                    client.publish(f"games/{lobby_name}/{player_name}/move", "LEFT")
+                                    not_moved = False
+                        if(closest_coin == None or not_moved):
+                            while(1):
+                                chosen_move = allowed_moves[random.randint(0, 3)]
+                                if chosen_move == 'DOWN':
+                                    new_pos = [gameState['currentPosition'][0]+1,gameState['currentPosition'][1]]
+                                elif chosen_move == 'UP':
+                                    new_pos = [gameState['currentPosition'][0]-1,gameState['currentPosition'][1]]
+                                elif chosen_move == 'LEFT':
+                                    new_pos = [gameState['currentPosition'][0],gameState['currentPosition'][1]+1]
+                                elif chosen_move == 'RIGHT':
+                                    new_pos = [gameState['currentPosition'][0],gameState['currentPosition'][1]-1]
+                                if (new_pos not in gameState["walls"]) and (new_pos not in gameState["enemyPositions"]) and (new_pos not in gameState["teammatePositions"]) and new_pos[0]<10 and new_pos[0]>-1 and new_pos[1]<10 and new_pos[1]>-1 :
+                                    print("RANDOM " + chosen_move)
+                                    client.publish(f"games/{lobby_name}/{player_name}/move", chosen_move)
+                                    break
+                    if(c == 2):
+                        move = ""
+                        while(1):
+                            move = input("Where do you want to move?")
+                            if(move in allowed_moves):
+                                break
+                        client.publish(f"games/{lobby_name}/{player_name}/move", move)
+                    turnTime = False
+                    # exit()  
